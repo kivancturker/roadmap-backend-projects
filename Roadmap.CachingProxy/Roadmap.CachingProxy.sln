@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Roadmap.CachingProxy", "Roadmap.CachingProxy\Roadmap.CachingProxy.csproj", "{3B008A9F-33F6-40AF-9940-8AF38546BAFE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3B008A9F-33F6-40AF-9940-8AF38546BAFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3B008A9F-33F6-40AF-9940-8AF38546BAFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3B008A9F-33F6-40AF-9940-8AF38546BAFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3B008A9F-33F6-40AF-9940-8AF38546BAFE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
