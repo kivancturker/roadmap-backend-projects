@@ -1,4 +1,6 @@
-﻿namespace Roadmap.CachingProxy;
+﻿using Microsoft.VisualBasic.CompilerServices;
+
+namespace Roadmap.CachingProxy;
 
 /*
  * PROJECT DESCRIPTION
@@ -13,8 +15,8 @@
 
 
 /*
- * TODO: Initialize git and push the initial project.
- * TODO: Program should accept the arguments as expected.
+ * TODO: (DONE) Initialize git and push the initial project.
+ * TODO: (DONE) Program should accept the arguments as expected.
  * TODO: Start forwarding requests to the target url without caching.
  * TODO: Start InMemory caching. No store.
  * TODO: Store the cached responses.
@@ -25,6 +27,22 @@ class Program
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        // Provide args and get (port, originUrl, isClearCache) 
+        int? port;
+        string origin;
+        bool isClearCache;
+        Argument argument = new Argument();
+        try
+        {
+            (port, origin, isClearCache) = argument.ParseArguments(args);
+            Console.WriteLine($"port: {port}, origin: {origin}, isClearCache: {isClearCache}");
+        }
+        catch (CustomException exception)
+        {
+            Console.Error.WriteLine(exception.Message);
+            Environment.Exit(1);
+        }
+        
+        
     }
 }
