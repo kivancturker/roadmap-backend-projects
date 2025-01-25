@@ -21,7 +21,7 @@ namespace Roadmap.CachingProxy;
  * TODO: (DONE) Initialize git and push the initial project.
  * TODO: (DONE) Program should accept the arguments as expected.
  * TODO: (DONE) Start forwarding requests to the target url without caching.
- * TODO: Start InMemory caching. No store.
+ * TODO: (DONE) Start InMemory caching. No store.
  * TODO: Store the cached responses.
  * TODO: Remove the stored cached responses if --clear-cache flag provided.
  */
@@ -40,6 +40,7 @@ class Program
         string origin;
         bool isClearCache;
         Argument argument = new Argument();
+        CacheManager cacheManager = new CacheManager();
         try
         {
             (port, origin, isClearCache) = argument.ParseArguments(args);
@@ -58,18 +59,23 @@ class Program
                 // Get request
                 HttpListenerContext context = listener.GetContext();
                 HttpListenerRequest request = context.Request;
-                HttpListenerResponse response = context.Response;
+                CachedRequest cachedRequest = new CachedRequest(request.HttpMethod, request.Url.PathAndQuery);
+                
+                // Check if request is made before
+                if (cacheManager.Contains(cachedRequest))
+                {
+                    HttpResponseMessage cachedResponse = cacheManager.Get(cachedRequest);
+                    await SendResponse(cachedResponse, context, true);
+                    continue;
+                }
 
                 HttpRequestMessage requestToForward =
                     ConvertHttpListenerRequestToHttpRequestMessage(request, baseUri);
 
                 // Forward the requst to the origin
                 HttpResponseMessage responseFromOrigin = httpClient.Send(requestToForward);
-                byte[] buffer = await responseFromOrigin.Content.ReadAsByteArrayAsync();
-                response.ContentLength64 = buffer.Length;
-                Stream output = response.OutputStream;
-                output.Write(buffer, 0, buffer.Length);
-                output.Close();
+                cacheManager.Add(cachedRequest, responseFromOrigin);
+                await SendResponse(responseFromOrigin, context, false);
             }
         }
         catch (CustomException exception)
@@ -103,5 +109,24 @@ class Program
 
         return requestMessage;
     }
+
+    private static async Task SendResponse(HttpResponseMessage responseMessage, HttpListenerContext context, bool isCacheHit = false) 
+    {
+        HttpListenerResponse response = context.Response;
+        byte[] buffer = await responseMessage.Content.ReadAsByteArrayAsync();
+        response.ContentLength64 = buffer.Length;
+        if (isCacheHit)
+        {
+            response.Headers.Add("X-Cache", "HIT");
+        }
+        else
+        {
+            response.Headers.Add("X-Cache", "MISS");
+        }
         
+        using Stream output = response.OutputStream;
+        output.Write(buffer, 0, buffer.Length);
+        output.Close();
+    }
+
 }
