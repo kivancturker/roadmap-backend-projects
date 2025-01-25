@@ -22,7 +22,7 @@ namespace Roadmap.CachingProxy;
  * TODO: (DONE) Program should accept the arguments as expected.
  * TODO: (DONE) Start forwarding requests to the target url without caching.
  * TODO: (DONE) Start InMemory caching. No store.
- * TODO: Store the cached responses.
+ * TODO: (DONE) Store the cached responses.
  * TODO: Remove the stored cached responses if --clear-cache flag provided.
  */
 
@@ -44,7 +44,7 @@ class Program
         try
         {
             (port, origin, isClearCache) = argument.ParseArguments(args);
-            
+
             // Forwarding step
             // Listen on provided port
             int validPort = port ?? DEFAULT_PORT;
@@ -60,7 +60,7 @@ class Program
                 HttpListenerContext context = listener.GetContext();
                 HttpListenerRequest request = context.Request;
                 CachedRequest cachedRequest = new CachedRequest(request.HttpMethod, request.Url.PathAndQuery);
-                
+
                 // Check if request is made before
                 if (cacheManager.Contains(cachedRequest))
                 {
@@ -75,6 +75,7 @@ class Program
                 // Forward the requst to the origin
                 HttpResponseMessage responseFromOrigin = httpClient.Send(requestToForward);
                 cacheManager.Add(cachedRequest, responseFromOrigin);
+                cacheManager.Persist();
                 await SendResponse(responseFromOrigin, context, false);
             }
         }
@@ -82,6 +83,10 @@ class Program
         {
             Console.Error.WriteLine(exception.Message);
             Environment.Exit(1);
+        }
+        finally
+        {
+            cacheManager.Persist();
         }
     }
 

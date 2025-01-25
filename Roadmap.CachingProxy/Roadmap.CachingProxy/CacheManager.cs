@@ -5,10 +5,12 @@ namespace Roadmap.CachingProxy;
 public class CacheManager
 {
     private Dictionary<CachedRequest, HttpResponseMessage> _cache;
-
+    private CacheFileManager _cacheFileManager;
+    
     public CacheManager()
     {
-        _cache = new Dictionary<CachedRequest, HttpResponseMessage>();
+        _cacheFileManager = new CacheFileManager();
+        _cache = _cacheFileManager.GetAllCachedRequests();
     }
 
     public bool Contains(CachedRequest request)
@@ -29,6 +31,11 @@ public class CacheManager
         }
 
         throw new CustomException("Request not found on cache");
+    }
+
+    public void Persist()
+    {
+        _cacheFileManager.SaveCacheContentToFile(_cache);
     }
 }
 
